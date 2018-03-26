@@ -8,11 +8,15 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('meta-title')</title>
+    <meta name="description" content="@yield('meta-desc')">
+    <meta name="author" content="@yield('meta-author')">
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/sweetalert.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
     <div id="app">
@@ -29,7 +33,7 @@
                     </button>
 
                     <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/blog') }}">
+                    <a class="navbar-brand" href="{{ url('/') }}">
                       Projecto
                         <!-- {{ config('app.name', 'Laravel') }} -->
                     </a>
@@ -37,7 +41,29 @@
 
                 <div class="collapse navbar-collapse" id="app-navbar-collapse">
                     <!-- Left Side Of Navbar -->
-                    <ul class="nav navbar-nav">
+                    <ul class="nav navbar-nav navbar-left">
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
+                            Categories <span class="caret"></span>
+                        </a>
+                        @if ($c)
+                        <ul class="dropdown-menu" role="menu">
+                          @foreach ($c as $c)
+                            @if ($c->blog->count() > 0)
+                            <li> <a href="{{ route('categories.show', $c->slug) }}">{{ $c->name }}</a> </li>
+                            @endif
+                          @endforeach
+                        </ul>
+                        @endif
+                      </li>
+                      <li><a href="{{ url('/blog/create') }}">Blog</a></li>
+                      @if (Auth::user())
+                      <li><a href="{{ url('/users') }}">Dashboard</a></li>
+                      @endif
+                      @if (Auth::user() ? Auth::user()->role->id === 1 : '')
+                      <li><a href="{{ url('/admin') }}">Admin</a></li>
+                      @endif
+                      <li><a href="{{ url('/contact') }}">Contact us</a></li>
                         &nbsp;
                     </ul>
 
@@ -48,6 +74,9 @@
                             <li><a href="{{ route('login') }}">Login</a></li>
                             <li><a href="{{ route('register') }}">Register</a></li>
                         @else
+                            <li>
+                              <a href="{{ action('UserController@edit', Auth::user()->username) }}">Profile Setting</a>
+                            </li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true">
                                     {{ Auth::user()->name }} <span class="caret"></span>
@@ -77,6 +106,25 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
+    <!-- <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/sweetalert.js') }}"></script> -->
+
+
+    <script src="/js/app.js"></script>
+    <script src="/js/jquery-3.3.1.slim.js"></script>
+    <script src="/js/sweetalert.min.js"></script>
+    <script>
+        @if (notify()->ready())
+            swal({
+                  title: "{!! notify()->message() !!}",
+                  type: "{!! notify()->type() !!}",
+                  @if (notify()->option('timer'))
+                    timer: "{!! notify()->option('timer') !!}",
+                    showConfirmButton: true,
+                  @endif
+                  html: true
+                });
+        @endif
+    </script>
 </body>
 </html>
